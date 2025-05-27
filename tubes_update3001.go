@@ -46,8 +46,8 @@ type User struct {
 func main() {
 	initAdmin()
 	var pilihan int
-	loggedIn := false
-	aplikasiAktif := true
+	var loggedIn bool = false
+	var aplikasiAktif bool = true
 
 	for aplikasiAktif {
 		if !loggedIn {
@@ -83,25 +83,27 @@ func main() {
 
 // inisialisasi admin
 func initAdmin() {
-	adminUser := User{
-		id:       0,
-		username: "admin",
-		password: "admin",
-		userType: ADMIN,
-	}
+	var adminUser User
+	adminUser.id = 0
+	adminUser.username = "admin"
+	adminUser.password = "admin"
+	adminUser.userType = ADMIN
+
 	daftarUser[jumlahUser] = adminUser
 	jumlahUser++
 }
 
 func login() bool {
-	var username, password string
+	var username string
+	var password string
 	fmt.Println("\n======================== Login SimpleFund =========================")
 	fmt.Print("Username: ")
 	fmt.Scan(&username)
 	fmt.Print("Password: ")
 	fmt.Scan(&password)
 
-	for i := 0; i < jumlahUser; i++ {
+	var i int
+	for i = 0; i < jumlahUser; i++ {
 		if daftarUser[i].username == username && daftarUser[i].password == password {
 			currentUser = daftarUser[i]
 			systemMessage = fmt.Sprintf("✅ Login berhasil! \nSelamat datang %s👋 \nID Anda adalah: %d", currentUser.username, currentUser.id)
@@ -121,14 +123,23 @@ func register() {
 
 	var newUser User
 	fmt.Println("\n======================== Register SimpleFund ========================")
-	isUnique := false
+	var isUnique bool = false
 	for !isUnique {
 		fmt.Print("Username baru: ")
 		fmt.Scan(&newUser.username)
 
 		isUnique = true
-		for i := 0; i < jumlahUser && isUnique; i++ {
+		// Cek username di daftar user
+		var i int
+		for i = 0; i < jumlahUser && isUnique; i++ {
 			if daftarUser[i].username == newUser.username {
+				fmt.Println("💬 Username sudah digunakan, silakan pilih username lain")
+				isUnique = false
+			}
+		}
+		// Cek username di daftar donatur (tidak boleh sama dengan nama donatur)
+		for i = 0; i < jumlahDonatur && isUnique; i++ {
+			if daftarDonatur[i].nama == newUser.username {
 				fmt.Println("💬 Username sudah digunakan, silakan pilih username lain")
 				isUnique = false
 			}
@@ -138,12 +149,24 @@ func register() {
 	fmt.Print("Password: ")
 	fmt.Scan(&newUser.password)
 
-	// ID user selalu mulai dari 1
 	newUser.userType = USER
 
 	// assign ID otomatis (dimulai dari 1, bertambah secara berurutan, kalau udah dipake, skip)
-	for i := 0; i < jumlahDonatur; i++ {
-		if daftarDonatur[i].id == nextUserID{
+	var idUnik bool = false
+	for !idUnik {
+		idUnik = true
+		var i int
+		for i = 0; i < jumlahUser; i++ {
+			if daftarUser[i].id == nextUserID {
+				idUnik = false
+			}
+		}
+		for i = 0; i < jumlahDonatur; i++ {
+			if daftarDonatur[i].id == nextUserID {
+				idUnik = false
+			}
+		}
+		if !idUnik {
 			nextUserID++
 		}
 	}
@@ -159,13 +182,13 @@ func register() {
 func userMenu() {
 	var pilihan int
 	var pilihanSorting int
-	selesai := false
-	urutkanDefault := true
-	urutkanNamaProyek := false
-	urutkanDanaTerkumpul := false
-	urutkanDanaDibutuhkan := false
-	ProyekDicari := false
-	lastSearch := false // untuk melacak searching sebelumnya
+	var selesai bool = false
+	var urutkanDefault bool = true
+	var urutkanNamaProyek bool = false
+	var urutkanDanaTerkumpul bool = false
+	var urutkanDanaDibutuhkan bool = false
+	var ProyekDicari bool = false
+	var lastSearch bool = false // untuk melacak searching sebelumnya
 
 	for !selesai {
 		if !lastSearch {
@@ -177,7 +200,7 @@ func userMenu() {
 			fmt.Println(systemMessage)
 			systemMessage = ""
 		}
-		
+
 		if ProyekDicari == false {
 			fmt.Println("\n======================= Menu User SimpleFund =======================")
 		}
@@ -260,7 +283,8 @@ func userMenu() {
 				fmt.Scan(&dicariID)
 				clear() // clear line sebelum menampilkan hasil pencarian
 
-				indexDitemukan := linearSearchIDProyek(daftarProyek, jumlahProyek, dicariID)
+				var indexDitemukan int
+				indexDitemukan = linearSearchIDProyek(daftarProyek, jumlahProyek, dicariID)
 				fmt.Println("\n======================= Menu User SimpleFund =======================")
 				tampilkanProyekDicari(daftarProyek, indexDitemukan)
 				lastSearch = true
@@ -279,7 +303,8 @@ func userMenu() {
 				fmt.Scan(&dicariNama)
 				clear() // clear line sebelum menampilkan hasil pencarian
 
-				indexDitemukan := linearSearchNamaProyek(daftarProyek, jumlahProyek, dicariNama)
+				var indexDitemukan int
+				indexDitemukan = linearSearchNamaProyek(daftarProyek, jumlahProyek, dicariNama)
 				fmt.Println("\n======================= Menu User SimpleFund =======================")
 				tampilkanProyekDicari(daftarProyek, indexDitemukan)
 				lastSearch = true
@@ -311,19 +336,19 @@ func userMenu() {
 func adminMenu() {
 	var pilihan int
 	var pilihanSorting int
-	urutkanDefault := true
-	urutkanNamaProyek := false
-	urutkanDanaTerkumpul := false
-	urutkanDanaDibutuhkan := false
-	urutkanDefaultDonatur := false
-	urutkanNamaDonatur := false
-	urutkanTotalDonasiDonatur := false
-	ProyekDicari := false
-	DonaturDicari := false
-	lastSearch := false // untuk melacak search sebelumnya
+	var urutkanDefault bool = true
+	var urutkanNamaProyek bool = false
+	var urutkanDanaTerkumpul bool = false
+	var urutkanDanaDibutuhkan bool = false
+	var urutkanDefaultDonatur bool = false
+	var urutkanNamaDonatur bool = false
+	var urutkanTotalDonasiDonatur bool = false
+	var ProyekDicari bool = false
+	var DonaturDicari bool = false
+	var lastSearch bool = false // untuk melacak search sebelumnya
 
-	selesai := false
-	i := 1
+	var selesai bool = false
+	var i int = 1
 
 	for !selesai {
 		if !lastSearch {
@@ -520,8 +545,9 @@ func adminMenu() {
 				fmt.Scan(&dicariID)
 				clear() // clear line sebelum menampilkan hasil pencarian
 
-				indexDitemukan := linearSearchIDProyek(daftarProyek, jumlahProyek, dicariID)
-				if indexDitemukan != -1{
+				var indexDitemukan int
+				indexDitemukan = linearSearchIDProyek(daftarProyek, jumlahProyek, dicariID)
+				if indexDitemukan != -1 {
 					fmt.Println("============================ Menu Admin ============================")
 				}
 				tampilkanProyekDicari(daftarProyek, indexDitemukan)
@@ -545,8 +571,9 @@ func adminMenu() {
 				fmt.Scan(&dicariNama)
 				clear() // clear line sebelum menampilkan hasil pencarian
 
-				indexDitemukan := linearSearchNamaProyek(daftarProyek, jumlahProyek, dicariNama)
-				if indexDitemukan != -1{
+				var indexDitemukan int
+				indexDitemukan = linearSearchNamaProyek(daftarProyek, jumlahProyek, dicariNama)
+				if indexDitemukan != -1 {
 					fmt.Println("============================ Menu Admin ============================")
 				}
 				tampilkanProyekDicari(daftarProyek, indexDitemukan)
@@ -585,8 +612,9 @@ func adminMenu() {
 				clear() // clear line sebelum menampilkan hasil pencarian
 
 				selectionSortIDDonaturASC(&daftarDonatur, jumlahDonatur)
-				indexDitemukan := binarySearchIDDonatur(daftarDonatur, jumlahDonatur, dicariID)
-				if indexDitemukan != -1{
+				var indexDitemukan int
+				indexDitemukan = binarySearchIDDonatur(daftarDonatur, jumlahDonatur, dicariID)
+				if indexDitemukan != -1 {
 					fmt.Println("============================ Menu Admin ============================")
 				}
 				tampilkanDonaturDicari(daftarDonatur, indexDitemukan)
@@ -611,8 +639,9 @@ func adminMenu() {
 				clear() // clear line sebelum menampilkan hasil pencarian
 
 				selectionSortNamaDonaturASC(&daftarDonatur, jumlahDonatur)
-				indexDitemukan := binarySearchNamaDonatur(daftarDonatur, jumlahDonatur, dicariNama)
-				if indexDitemukan != -1{
+				var indexDitemukan int
+				indexDitemukan = binarySearchNamaDonatur(daftarDonatur, jumlahDonatur, dicariNama)
+				if indexDitemukan != -1 {
 					fmt.Println("============================ Menu Admin ============================")
 				}
 				tampilkanDonaturDicari(daftarDonatur, indexDitemukan)
@@ -663,7 +692,8 @@ selectionSort : selectionSortNamaDonaturASC, selectionSortTotalDonasiDonaturDSC,
 */
 
 func linearSearchNamaProyek(data [NMAX]Proyek, n int, dicari string) int {
-	for i := 0; i < n; i++ {
+	var i int
+	for i = 0; i < n; i++ {
 		if data[i].nama == dicari {
 			return i
 		}
@@ -672,7 +702,8 @@ func linearSearchNamaProyek(data [NMAX]Proyek, n int, dicari string) int {
 }
 
 func linearSearchIDProyek(data [NMAX]Proyek, n int, dicari int) int {
-	for i := 0; i < n; i++ {
+	var i int
+	for i = 0; i < n; i++ {
 		if data[i].id == dicari {
 			return i
 		}
@@ -681,11 +712,11 @@ func linearSearchIDProyek(data [NMAX]Proyek, n int, dicari int) int {
 }
 
 func binarySearchNamaDonatur(data [NMAX]Donatur, n int, dicari string) int {
-	kiri := 0
-	kanan := n - 1
+	var kiri int = 0
+	var kanan int = n - 1
 
 	for kiri <= kanan {
-		tengah := (kiri + kanan) / 2
+		var tengah int = (kiri + kanan) / 2
 
 		if data[tengah].nama == dicari {
 			return tengah
@@ -702,11 +733,11 @@ func binarySearchNamaDonatur(data [NMAX]Donatur, n int, dicari string) int {
 }
 
 func binarySearchIDDonatur(data [NMAX]Donatur, n int, dicari int) int {
-	kiri := 0
-	kanan := n - 1
+	var kiri int = 0
+	var kanan int = n - 1
 
 	for kiri <= kanan {
-		tengah := (kiri + kanan) / 2
+		var tengah int = (kiri + kanan) / 2
 
 		if data[tengah].id == dicari {
 			return tengah
@@ -724,9 +755,10 @@ func binarySearchIDDonatur(data [NMAX]Donatur, n int, dicari int) int {
 
 // Fungsi insertion sort untuk proyek berdasarkan nama (ascending)
 func insertionSortNamaProyekASC(data *[NMAX]Proyek, jumlah int) {
-	for i := 1; i < jumlah; i++ {
-		key := data[i]
-		j := i - 1
+	var i, j int
+	for i = 1; i < jumlah; i++ {
+		var key Proyek = data[i]
+		j = i - 1
 		for j >= 0 && data[j].nama > key.nama {
 			data[j+1] = data[j]
 			j--
@@ -737,9 +769,10 @@ func insertionSortNamaProyekASC(data *[NMAX]Proyek, jumlah int) {
 
 // Fungsi insertion sort untuk Dana terkumpul proyek (descending)
 func insertionSortDanaTerkumpulProyekDSC(data *[NMAX]Proyek, jumlah int) {
-	for i := 1; i < jumlah; i++ {
-		key := data[i]
-		j := i - 1
+	var i, j int
+	for i = 1; i < jumlah; i++ {
+		var key Proyek = data[i]
+		j = i - 1
 		for j >= 0 && data[j].danaTerkumpul < key.danaTerkumpul {
 			data[j+1] = data[j]
 			j--
@@ -750,9 +783,10 @@ func insertionSortDanaTerkumpulProyekDSC(data *[NMAX]Proyek, jumlah int) {
 
 // Fungsi insertion sort untuk Dana dibutuhkan proyek (descending)
 func insertionSortDanaDibutuhkanProyekDSC(data *[NMAX]Proyek, jumlah int) {
-	for i := 1; i < jumlah; i++ {
-		key := data[i]
-		j := i - 1
+	var i, j int
+	for i = 1; i < jumlah; i++ {
+		var key Proyek = data[i]
+		j = i - 1
 		for j >= 0 && data[j].danaDibutuhkan < key.danaDibutuhkan {
 			data[j+1] = data[j]
 			j--
@@ -763,9 +797,10 @@ func insertionSortDanaDibutuhkanProyekDSC(data *[NMAX]Proyek, jumlah int) {
 
 // Fungsi selection sort untuk donatur berdasarkan totalDonasi (descending)
 func selectionSortTotalDonasiDonaturDSC(data *[NMAX]Donatur, jumlah int) {
-	for i := 0; i < jumlah-1; i++ {
-		maxIdx := i
-		for j := i + 1; j < jumlah; j++ {
+	var i, j, maxIdx int
+	for i = 0; i < jumlah-1; i++ {
+		maxIdx = i
+		for j = i + 1; j < jumlah; j++ {
 			if data[j].totalDonasi > data[maxIdx].totalDonasi {
 				maxIdx = j
 			}
@@ -776,9 +811,10 @@ func selectionSortTotalDonasiDonaturDSC(data *[NMAX]Donatur, jumlah int) {
 
 // Fungsi selection sort untuk donatur berdasarkan nama (ascending)
 func selectionSortNamaDonaturASC(data *[NMAX]Donatur, jumlah int) {
-	for i := 0; i < jumlah-1; i++ {
-		minIdx := i
-		for j := i + 1; j < jumlah; j++ {
+	var i, j, minIdx int
+	for i = 0; i < jumlah-1; i++ {
+		minIdx = i
+		for j = i + 1; j < jumlah; j++ {
 			if data[j].nama < data[minIdx].nama {
 				minIdx = j
 			}
@@ -788,19 +824,21 @@ func selectionSortNamaDonaturASC(data *[NMAX]Donatur, jumlah int) {
 }
 
 func selectionSortIDDonaturASC(data *[NMAX]Donatur, jumlah int) {
-    for i := 0; i < jumlah-1; i++ {
-        minIdx := i
-        for j := i + 1; j < jumlah; j++ {
-            if data[j].id < data[minIdx].id {
-                minIdx = j
-            }
-        }
-        data[i], data[minIdx] = data[minIdx], data[i]
-    }
+	var i, j, minIdx int
+	for i = 0; i < jumlah-1; i++ {
+		minIdx = i
+		for j = i + 1; j < jumlah; j++ {
+			if data[j].id < data[minIdx].id {
+				minIdx = j
+			}
+		}
+		data[i], data[minIdx] = data[minIdx], data[i]
+	}
 }
 
 func cariProyekByID(id int, data [NMAX]Proyek, jumlah int) int {
-	for i := 0; i < jumlah; i++ {
+	var i int
+	for i = 0; i < jumlah; i++ {
 		if data[i].id == id {
 			return i
 		}
@@ -809,7 +847,8 @@ func cariProyekByID(id int, data [NMAX]Proyek, jumlah int) int {
 }
 
 func cariDonaturByID(id int, data [NMAX]Donatur, jumlah int) int {
-	for i := 0; i < jumlah; i++ {
+	var i int
+	for i = 0; i < jumlah; i++ {
 		if data[i].id == id {
 			return i
 		}
@@ -835,13 +874,14 @@ func tampilkanProyekDicari(data [NMAX]Proyek, indexDitemukan int) {
 	}
 
 	if indexDitemukan != -1 {
-		status := ""
+		var status string
 		if data[indexDitemukan].danaTerkumpul >= data[indexDitemukan].danaDibutuhkan {
 			status = "Dana Sudah Mencukupi"
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s\n", indexDitemukan+1, data[indexDitemukan].id, data[indexDitemukan].nama, data[indexDitemukan].danaTerkumpul, data[indexDitemukan].danaDibutuhkan, status)
 		} else {
 			status = "Kurang Rp"
-			sisaKebutuhan := data[indexDitemukan].danaDibutuhkan - data[indexDitemukan].danaTerkumpul
+			var sisaKebutuhan int
+			sisaKebutuhan = data[indexDitemukan].danaDibutuhkan - data[indexDitemukan].danaTerkumpul
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s%d\n", indexDitemukan+1, data[indexDitemukan].id, data[indexDitemukan].nama, data[indexDitemukan].danaTerkumpul, data[indexDitemukan].danaDibutuhkan, status, sisaKebutuhan)
 		}
 	}
@@ -861,14 +901,16 @@ func tampilkanProyekDefault(data [NMAX]Proyek, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-15s | %-15s | %-30s\n", "-", "-", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
-		status := ""
+	var i int
+	for i = 0; i < jumlah; i++ {
+		var status string
 		if data[i].danaTerkumpul >= data[i].danaDibutuhkan {
 			status = "Dana Sudah Mencukupi"
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status)
 		} else {
 			status = "Kurang Rp"
-			sisaKebutuhan := data[i].danaDibutuhkan - data[i].danaTerkumpul
+			var sisaKebutuhan int
+			sisaKebutuhan = data[i].danaDibutuhkan - data[i].danaTerkumpul
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s%d\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status, sisaKebutuhan)
 		}
 	}
@@ -887,14 +929,16 @@ func tampilkanProyekUrutkanNama(data [NMAX]Proyek, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-15s | %-15s | %-30s\n", "-", "-", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
-		status := ""
+	var i int
+	for i = 0; i < jumlah; i++ {
+		var status string
 		if data[i].danaTerkumpul >= data[i].danaDibutuhkan {
 			status = "Dana Sudah Mencukupi"
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status)
 		} else {
 			status = "Kurang Rp"
-			sisaKebutuhan := data[i].danaDibutuhkan - data[i].danaTerkumpul
+			var sisaKebutuhan int
+			sisaKebutuhan = data[i].danaDibutuhkan - data[i].danaTerkumpul
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s%d\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status, sisaKebutuhan)
 		}
 	}
@@ -913,14 +957,16 @@ func tampilkanProyekUrutkanDanaTerkumpul(data [NMAX]Proyek, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-15s | %-15s | %-30s\n", "-", "-", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
-		status := ""
+	var i int
+	for i = 0; i < jumlah; i++ {
+		var status string
 		if data[i].danaTerkumpul >= data[i].danaDibutuhkan {
 			status = "Dana Sudah Mencukupi"
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status)
 		} else {
 			status = "Kurang Rp"
-			sisaKebutuhan := data[i].danaDibutuhkan - data[i].danaTerkumpul
+			var sisaKebutuhan int
+			sisaKebutuhan = data[i].danaDibutuhkan - data[i].danaTerkumpul
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s%d\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status, sisaKebutuhan)
 		}
 	}
@@ -939,21 +985,23 @@ func tampilkanProyekUrutkanDanaDibutuhkan(data [NMAX]Proyek, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-15s | %-15s | %-30s\n", "-", "-", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
-		status := ""
+	var i int
+	for i = 0; i < jumlah; i++ {
+		var status string
 		if data[i].danaTerkumpul >= data[i].danaDibutuhkan {
 			status = "Dana Sudah Mencukupi"
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status)
 		} else {
 			status = "Kurang Rp"
-			sisaKebutuhan := data[i].danaDibutuhkan - data[i].danaTerkumpul
+			var sisaKebutuhan int
+			sisaKebutuhan = data[i].danaDibutuhkan - data[i].danaTerkumpul
 			fmt.Printf("%-4d | %-10d | %-20s | Rp%-13d | Rp%-13d | %s%d\n", i+1, data[i].id, data[i].nama, data[i].danaTerkumpul, data[i].danaDibutuhkan, status, sisaKebutuhan)
 		}
 	}
 	fmt.Println("🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦🟦")
 }
 
-// tampilkan donatur yang dicari
+// tampilkan donatur
 func tampilkanDonaturDicari(data [NMAX]Donatur, indexDitemukan int) {
 	if indexDitemukan != -1 {
 		fmt.Println("\n🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩")
@@ -987,7 +1035,8 @@ func tampilkanDonaturDefault(data [NMAX]Donatur, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-25s\n", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
+	var i int
+	for i = 0; i < jumlah; i++ {
 		fmt.Printf("%-4d | %-10d | %-20s | %-25d\n", i+1, data[i].id, data[i].nama, data[i].totalDonasi)
 	}
 	fmt.Println("🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩")
@@ -1004,7 +1053,8 @@ func tampilkanDonaturUrutkanNama(data [NMAX]Donatur, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-25s\n", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
+	var i int
+	for i = 0; i < jumlah; i++ {
 		fmt.Printf("%-4d | %-10d | %-20s | %-25d\n", i+1, data[i].id, data[i].nama, data[i].totalDonasi)
 	}
 	fmt.Println("🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩")
@@ -1021,7 +1071,8 @@ func tampilkanDonaturUrutkanTotalDonasi(data [NMAX]Donatur, jumlah int) {
 		fmt.Printf("%-4s | %-10s | %-20s | %-25s\n", "-", "-", "-", "-")
 	}
 
-	for i := 0; i < jumlah; i++ {
+	var i int
+	for i = 0; i < jumlah; i++ {
 		fmt.Printf("%-4d | %-10d | %-20s | %-25d\n", i+1, data[i].id, data[i].nama, data[i].totalDonasi)
 	}
 	fmt.Println("🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩")
@@ -1032,29 +1083,43 @@ func tambahProyek(data *[NMAX]Proyek, jumlah *int) {
 	fmt.Print("Berapa proyek yang ingin ditambahkan? ")
 	fmt.Scan(&n)
 
-	for i := 0; i < n && *jumlah < NMAX; i++ {
+	var i int
+	for i = 0; i < n && *jumlah < NMAX; i++ {
 		var p Proyek
 		fmt.Println("\n============ ➕ Tambahkan Proyek ➕ ==============")
 
-		// Input ID
-		ulang := true
+		// Validasi ID proyek unik
+		var ulang bool = true
 		for ulang {
 			fmt.Print("Masukkan ID Proyek: ")
 			fmt.Scan(&p.id)
-			duplikat := false
-
-			for j := 0; j < *jumlah && !duplikat; j++ {
+			var duplikat bool = false
+			var j int
+			for j = 0; j < *jumlah && !duplikat; j++ {
 				if data[j].id == p.id {
 					fmt.Println("💬 ID proyek sudah digunakan, silakan masukkan ID lain.")
 					duplikat = true
 				}
 			}
-
 			ulang = duplikat
 		}
 
-		fmt.Print("Nama Proyek: ")
-		fmt.Scan(&p.nama)
+		// Validasi nama proyek unik
+		var ulangNama bool = true
+		for ulangNama {
+			fmt.Print("Nama Proyek: ")
+			fmt.Scan(&p.nama)
+			var duplikatNama bool = false
+			var j int
+			for j = 0; j < *jumlah && !duplikatNama; j++ {
+				if data[j].nama == p.nama {
+					fmt.Println("💬 Nama proyek sudah digunakan, silakan masukkan nama lain.")
+					duplikatNama = true
+				}
+			}
+			ulangNama = duplikatNama
+		}
+
 		fmt.Print("Dana Dibutuhkan: ")
 		fmt.Scan(&p.danaDibutuhkan)
 
@@ -1074,28 +1139,58 @@ func tambahDonatur(data *[NMAX]Donatur, jumlah *int) {
 	fmt.Print("Berapa donatur yang ingin ditambahkan? ")
 	fmt.Scan(&n)
 
-	for i := 0; i < n && *jumlah < NMAX; i++ {
+	var i int
+	for i = 0; i < n && *jumlah < NMAX; i++ {
 		var d Donatur
 		fmt.Println("\n============ ➕ Tambahkan Donatur ➕ ==============")
 
-		ulang := true
+		// Validasi ID donatur unik
+		var ulang bool = true
 		for ulang {
 			fmt.Print("ID Donatur: ")
 			fmt.Scan(&d.id)
-			duplikat := false
-
-			for j := 0; j < *jumlah && !duplikat; j++ {
+			var duplikat bool = false
+			var j int
+			// Cek di daftar donatur
+			for j = 0; j < *jumlah && !duplikat; j++ {
 				if data[j].id == d.id {
-					fmt.Println("💬 ID donatur sudah digunakan, silakan masukkan ID lain.")
+					fmt.Println("💬 ID donatur sudah digunakan di daftar donatur, silakan masukkan ID lain.")
 					duplikat = true
 				}
 			}
-
+			// Cek di daftar user
+			for j = 0; j < jumlahUser && !duplikat; j++ {
+				if daftarUser[j].id == d.id {
+					fmt.Println("💬 ID donatur sudah digunakan di daftar user, silakan masukkan ID lain.")
+					duplikat = true
+				}
+			}
 			ulang = duplikat
 		}
 
-		fmt.Print("Nama Donatur: ")
-		fmt.Scan(&d.nama)
+		// Validasi nama donatur unik
+		var ulangNama bool = true
+		for ulangNama {
+			fmt.Print("Nama Donatur: ")
+			fmt.Scan(&d.nama)
+			var duplikatNama bool = false
+			var j int
+			// Tidak boleh sama dengan username user
+			for j = 0; j < jumlahUser && !duplikatNama; j++ {
+				if daftarUser[j].username == d.nama {
+					fmt.Println("💬 Nama donatur sudah digunakan di daftar user, silakan masukkan nama lain.")
+					duplikatNama = true
+				}
+			}
+			// Tidak boleh sama dengan nama donatur lain
+			for j = 0; j < *jumlah && !duplikatNama; j++ {
+				if data[j].nama == d.nama {
+					fmt.Println("💬 Nama donatur sudah digunakan di daftar donatur, silakan masukkan nama lain.")
+					duplikatNama = true
+				}
+			}
+			ulangNama = duplikatNama
+		}
 
 		d.totalDonasi = 0
 		data[*jumlah] = d
@@ -1104,7 +1199,7 @@ func tambahDonatur(data *[NMAX]Donatur, jumlah *int) {
 	}
 
 	if *jumlah >= NMAX {
-		systemMessage = "Kapasitas donatur penuh."
+		systemMessage = "⛔ Kapasitas donatur penuh\n"
 	}
 }
 
@@ -1119,19 +1214,22 @@ func donasi(proyek *[NMAX]Proyek, jumlahProyek int, donatur *[NMAX]Donatur, juml
 	fmt.Scan(&nominal)
 
 	if nominal <= 0 {
-		systemMessage = "Nominal donasi harus lebih dari 0."
+		systemMessage = "⛔ Nominal donasi harus lebih dari 0\n"
 		return
 	}
 
-	indeksProyek := cariProyekByID(idProyek, *proyek, jumlahProyek)
-	indeksDonatur := cariDonaturByID(idDonatur, *donatur, jumlahDonatur)
+	var indeksProyek int
+	var indeksDonatur int
+	indeksProyek = cariProyekByID(idProyek, *proyek, jumlahProyek)
+	indeksDonatur = cariDonaturByID(idDonatur, *donatur, jumlahDonatur)
 
 	if indeksProyek == -1 || indeksDonatur == -1 {
 		systemMessage = "⛔ ID Proyek atau Donatur tidak ditemukan\n"
 		return
 	}
 
-	sisaKebutuhan := proyek[indeksProyek].danaDibutuhkan - proyek[indeksProyek].danaTerkumpul
+	var sisaKebutuhan int
+	sisaKebutuhan = proyek[indeksProyek].danaDibutuhkan - proyek[indeksProyek].danaTerkumpul
 	if nominal > sisaKebutuhan {
 		systemMessage = fmt.Sprintf("⛔ Donasi melebihi kebutuhan proyek, maksimal yang bisa didonasikan: %d\n", sisaKebutuhan)
 		return
@@ -1152,23 +1250,23 @@ func donasiUser(proyek *[NMAX]Proyek, jumlahProyek int, donatur *[NMAX]Donatur, 
 	fmt.Scan(&nominal)
 
 	if nominal <= 0 {
-		systemMessage = "Nominal donasi harus lebih dari 0."
+		systemMessage = "⛔ Nominal donasi harus lebih dari 0\n"
 		return
 	}
 
-	indeksProyek := cariProyekByID(idProyek, *proyek, jumlahProyek)
+	var indeksProyek int
+	indeksProyek = cariProyekByID(idProyek, *proyek, jumlahProyek)
 	if indeksProyek == -1 {
-		systemMessage = "ID proyek tidak ditemukan."
+		systemMessage = "⛔ ID proyek tidak ditemukan\n"
 		return
 	}
 
 	// cari donatur berdasarkan username user yang sedang login
-	indeksDonatur := -1
-	i := 0
-	ditemukanDonatur := false
+	var indeksDonatur int = -1
+	var i int = 0
+	var ditemukanDonatur bool = false
 
 	for i < *jumlahDonatur && !ditemukanDonatur {
-		// cari donatur dengan nama yang sama dengan username user
 		if donatur[i].nama == currentUser.username {
 			indeksDonatur = i
 			ditemukanDonatur = true
@@ -1179,28 +1277,25 @@ func donasiUser(proyek *[NMAX]Proyek, jumlahProyek int, donatur *[NMAX]Donatur, 
 	// jika donatur belum ada, buat donatur baru secara otomatis
 	if indeksDonatur == -1 {
 		if *jumlahDonatur >= NMAX {
-			systemMessage = "Kapasitas donatur penuh. Hubungi admin untuk bantuan."
+			systemMessage = "⛔ Kapasitas donatur penuh, hubungi admin untuk bantuan\n"
 			return
 		}
 
-		// ID donatur pake ID user
 		var newID int = currentUser.id
-
-		// buat donatur baru dengan nama sama dengan username
 		var d Donatur
 		d.id = newID
 		d.nama = currentUser.username
 		d.totalDonasi = 0
 
-		// menambahkan ke daftar donatur
 		donatur[*jumlahDonatur] = d
 		indeksDonatur = *jumlahDonatur
 		*jumlahDonatur++
 	}
 
-	sisaKebutuhan := proyek[indeksProyek].danaDibutuhkan - proyek[indeksProyek].danaTerkumpul
+	var sisaKebutuhan int
+	sisaKebutuhan = proyek[indeksProyek].danaDibutuhkan - proyek[indeksProyek].danaTerkumpul
 	if nominal > sisaKebutuhan {
-		systemMessage = fmt.Sprintf("Donasi melebihi kebutuhan proyek. Maksimal yang bisa didonasikan:", sisaKebutuhan)
+		systemMessage = fmt.Sprintf("⛔ Donasi melebihi kebutuhan proyek, maksimal yang bisa didonasikan: %d\n", sisaKebutuhan)
 		return
 	}
 
@@ -1214,7 +1309,8 @@ func editProyek(data *[NMAX]Proyek, jumlah int) {
 	fmt.Println("\n============ Edit Proyek 📑 ==============")
 	fmt.Print("Masukkan ID proyek yang ingin diedit: ")
 	fmt.Scan(&id)
-	indeks := cariProyekByID(id, *data, jumlah)
+	var indeks int
+	indeks = cariProyekByID(id, *data, jumlah)
 
 	if indeks == -1 {
 		systemMessage = "⛔ Proyek dengan ID tersebut tidak ditemukan\n"
@@ -1222,8 +1318,25 @@ func editProyek(data *[NMAX]Proyek, jumlah int) {
 	}
 
 	fmt.Println("✅ Proyek ditemukan, masukkan data baru 📝")
-	fmt.Print("Nama Proyek: ")
-	fmt.Scan(&data[indeks].nama)
+
+	// Validasi nama proyek unik
+	var ulangNama bool = true
+	var namaBaru string
+	for ulangNama {
+		fmt.Print("Nama Proyek: ")
+		fmt.Scan(&namaBaru)
+		var duplikatNama bool = false
+		var j int
+		for j = 0; j < jumlah && !duplikatNama; j++ {
+			if j != indeks && data[j].nama == namaBaru {
+				fmt.Println("💬 Nama proyek sudah digunakan, silakan masukkan nama lain.")
+				duplikatNama = true
+			}
+		}
+		ulangNama = duplikatNama
+	}
+	data[indeks].nama = namaBaru
+
 	fmt.Print("Dana Dibutuhkan: ")
 	fmt.Scan(&data[indeks].danaDibutuhkan)
 	systemMessage = "📝 Data proyek berhasil diperbarui\n"
@@ -1234,7 +1347,8 @@ func editDonatur(data *[NMAX]Donatur, jumlah int) {
 	fmt.Println("\n============ Edit Donatur 📑 ==============")
 	fmt.Print("Masukkan ID donatur yang ingin diedit: ")
 	fmt.Scan(&id)
-	indeks := cariDonaturByID(id, *data, jumlah)
+	var indeks int
+	indeks = cariDonaturByID(id, *data, jumlah)
 
 	if indeks == -1 {
 		systemMessage = "⛔ Donatur dengan ID tersebut tidak ditemukan\n"
@@ -1242,8 +1356,31 @@ func editDonatur(data *[NMAX]Donatur, jumlah int) {
 	}
 
 	fmt.Println("✅ Donatur ditemukan, masukkan data baru 📝")
-	fmt.Print("Nama Donatur: ")
-	fmt.Scan(&data[indeks].nama)
+
+	// Validasi nama donatur unik dan tidak sama dengan username user
+	var ulangNama bool = true
+	var namaBaru string
+	for ulangNama {
+		fmt.Print("Nama Donatur: ")
+		fmt.Scan(&namaBaru)
+		var duplikatNama bool = false
+		var j int
+		for j = 0; j < jumlahUser && !duplikatNama; j++ {
+			if daftarUser[j].username == namaBaru {
+				fmt.Println("💬 Nama donatur sudah digunakan di daftar user, silakan masukkan nama lain.")
+				duplikatNama = true
+			}
+		}
+		for j = 0; j < jumlah && !duplikatNama; j++ {
+			if j != indeks && data[j].nama == namaBaru {
+				fmt.Println("💬 Nama donatur sudah digunakan di daftar donatur, silakan masukkan nama lain.")
+				duplikatNama = true
+			}
+		}
+		ulangNama = duplikatNama
+	}
+	data[indeks].nama = namaBaru
+
 	systemMessage = "📝 Data donatur berhasil diperbarui\n"
 }
 
@@ -1252,14 +1389,16 @@ func hapusProyek(data *[NMAX]Proyek, jumlah *int) {
 	fmt.Println("\n============ Hapus Proyek 📑 ==============")
 	fmt.Print("Masukkan ID proyek yang ingin dihapus: ")
 	fmt.Scan(&id)
-	indeks := cariProyekByID(id, *data, *jumlah)
+	var indeks int
+	indeks = cariProyekByID(id, *data, *jumlah)
 
 	if indeks == -1 {
 		systemMessage = "⛔ Proyek dengan ID tersebut tidak ditemukan\n"
 		return
 	}
 
-	for i := indeks; i < *jumlah-1; i++ {
+	var i int
+	for i = indeks; i < *jumlah-1; i++ {
 		data[i] = data[i+1]
 	}
 	*jumlah--
@@ -1271,14 +1410,16 @@ func hapusDonatur(data *[NMAX]Donatur, jumlah *int) {
 	fmt.Println("\n============ Hapus Donatur 📑 ==============")
 	fmt.Print("Masukkan ID donatur yang ingin dihapus: ")
 	fmt.Scan(&id)
-	indeks := cariDonaturByID(id, *data, *jumlah)
+	var indeks int
+	indeks = cariDonaturByID(id, *data, *jumlah)
 
 	if indeks == -1 {
 		systemMessage = "⛔ Donatur dengan ID tersebut tidak ditemukan\n"
 		return
 	}
 
-	for i := indeks; i < *jumlah-1; i++ {
+	var i int
+	for i = indeks; i < *jumlah-1; i++ {
 		data[i] = data[i+1]
 	}
 	*jumlah--
